@@ -1,33 +1,46 @@
-local Players = game:GetService("Players")
-local player = Players.LocalPlayer
+local player = game.Players.LocalPlayer
+local playerGui = player:WaitForChild("PlayerGui")
 
--- Create a ScreenGui
+-- Create GUI
 local banGui = Instance.new("ScreenGui")
-banGui.Name = "BanGui"
+banGui.Name = "FakeBanGui"
 banGui.ResetOnSpawn = false
-banGui.Parent = player:WaitForChild("PlayerGui")
+banGui.Parent = playerGui
 
--- Create a frame to cover the screen
-local frame = Instance.new("Frame")
-frame.Size = UDim2.new(1, 0, 1, 0)
-frame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
-frame.BackgroundTransparency = 0.5
-frame.Parent = banGui
+-- Background overlay
+local bg = Instance.new("Frame")
+bg.Size = UDim2.new(1, 0, 1, 0)
+bg.BackgroundColor3 = Color3.new(0, 0, 0)
+bg.BackgroundTransparency = 0.3
+bg.Parent = banGui
 
--- Create the message
-local textLabel = Instance.new("TextLabel")
-textLabel.Size = UDim2.new(0.6, 0, 0.2, 0)
-textLabel.Position = UDim2.new(0.2, 0, 0.4, 0)
-textLabel.Text = "You have been banned from this game."
-textLabel.TextScaled = true
-textLabel.BackgroundTransparency = 1
-textLabel.TextColor3 = Color3.new(1, 0, 0)
-textLabel.Font = Enum.Font.SourceSansBold
-textLabel.Parent = frame
+-- Ban message
+local message = Instance.new("TextLabel")
+message.Size = UDim2.new(0.6, 0, 0.2, 0)
+message.Position = UDim2.new(0.2, 0, 0.4, 0)
+message.BackgroundTransparency = 1
+message.Text = "You have been permanently banned from this experience."
+message.TextColor3 = Color3.fromRGB(255, 50, 50)
+message.Font = Enum.Font.GothamBold
+message.TextScaled = true
+message.Parent = bg
 
--- Optional: Disable character movement
-player.CharacterAdded:Connect(function(char)
-    local humanoid = char:WaitForChild("Humanoid")
-    humanoid.WalkSpeed = 0
-    humanoid.JumpPower = 0
-end)
+-- Looping sound
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://2665943889"
+sound.Looped = true
+sound.Volume = 1
+sound.Parent = banGui
+sound:Play()
+
+-- Freeze movement
+local function freezeCharacter()
+	local character = player.Character or player.CharacterAdded:Wait()
+	local humanoid = character:WaitForChild("Humanoid")
+	humanoid.WalkSpeed = 0
+	humanoid.JumpPower = 0
+	player.gameplaypause = true
+end
+
+freezeCharacter()
+player.CharacterAdded:Connect(freezeCharacter)
